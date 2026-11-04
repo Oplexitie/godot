@@ -2952,23 +2952,25 @@ void OS_X11::process_xevents() {
 				if (event.type == ButtonPress) {
 					DEBUG_LOG_X11("[%u] ButtonPress window=%lu, button_index=%u \n", frame, event.xbutton.window, mb->get_button_index());
 
-					uint64_t diff = get_ticks_usec() / 1000 - last_click_ms;
+					if (mb->get_button_index() < 4 || mb->get_button_index() > 7) {
 
-					if (mb->get_button_index() == last_click_button_index) {
-						if (diff < 400 && Point2(last_click_pos).distance_to(Point2(event.xbutton.x, event.xbutton.y)) < 5) {
-							last_click_ms = 0;
-							last_click_pos = Point2(-100, -100);
-							last_click_button_index = -1;
-							mb->set_doubleclick(true);
+						uint64_t diff = get_ticks_usec() / 1000 - last_click_ms;
+
+						if (mb->get_button_index() == last_click_button_index) {
+							if (diff < 400 && Point2(last_click_pos).distance_to(Point2(event.xbutton.x, event.xbutton.y)) < 5) {
+								last_click_ms = 0;
+								last_click_pos = Point2(-100, -100);
+								last_click_button_index = -1;
+								mb->set_doubleclick(true);
+							}
+						} else {
+							last_click_button_index = mb->get_button_index();
 						}
 
-					} else if (mb->get_button_index() < 4 || mb->get_button_index() > 7) {
-						last_click_button_index = mb->get_button_index();
-					}
-
-					if (!mb->is_doubleclick()) {
-						last_click_ms += diff;
-						last_click_pos = Point2(event.xbutton.x, event.xbutton.y);
+						if (!mb->is_doubleclick()) {
+							last_click_ms += diff;
+							last_click_pos = Point2(event.xbutton.x, event.xbutton.y);
+						}
 					}
 				} else {
 					DEBUG_LOG_X11("[%u] ButtonRelease window=%lu, button_index=%u \n", frame, event.xbutton.window, mb->get_button_index());
